@@ -36,7 +36,8 @@ public class NativeLoader {
 	 */
 	static public synchronized void load( Class c,
 										  String artifact,
-										  String version ) {
+										  String version )
+	throws IOException {
 		String group = c.getPackage().getName();
 		load( group, artifact, version );
 	}
@@ -59,14 +60,16 @@ public class NativeLoader {
 	 */
 	static public synchronized void load( String group,
 										  String artifact,
-										  String version ) {
-		if( isLoaded )
-			return;
+										  String version )
+		throws IOException {
 		try {
+			if( isLoaded )
+				return;
 			loadNativeLibrary( group, artifact, version );
 			isLoaded = true;
-		} catch( Throwable t ) {
-			log.error( t );
+		} catch( IOException ioe ) {
+			log.error( ioe );
+			throw ioe;
 		}
 	}
 
@@ -119,7 +122,7 @@ public class NativeLoader {
 		String nativeLibraryName = System.mapLibraryName( artifact +
 														  "-" + version );
 		String nativeLibraryPath = group.replaceAll( "\\.", "/" ) +
-			"/" + OSInfo.getNativeLibFolderPathForCurrentOS();
+			"/native/" + OSInfo.getNativeLibFolderPathForCurrentOS();
 
 		/*
 		  Ensure the resourceName starts '/' so is not subject to any
@@ -174,20 +177,24 @@ public class NativeLoader {
 		  read it multiple times.
 		*/
         String uuid = UUID.randomUUID().toString();
+        String extractedLibFileName =
+			resourceName.substring(1).replaceAll( "/", "." );
 		// In Maven terms, the uuid acts like a 'classifier'
-        String extractedLibFileName = resourceName + "-" + uuid;
-        File extractedLibFile = new File( outDir, extractedLibFileName);
+		extractedLibFileName += "-" + uuid;
+        File extractedLibFile = new File( outDir, extractedLibFileName );
 		log.debug( "Extracting " + resourceName + " to " + extractedLibFile );
 
 		InputStream is = NativeLoader.class.getResourceAsStream
 			( resourceName );
 		FileUtils.copyInputStreamToFile( is, extractedLibFile );
 		is.close();
+		extractedLibFile.deleteOnExit();
 
 		// Set executable (x) flag to enable Java to load the native library
 		extractedLibFile.setReadable(true);
 		//extractedLibFile.setWritable(true, true);
 		extractedLibFile.setExecutable(true);
+
 		return extractedLibFile;
 	}
 	

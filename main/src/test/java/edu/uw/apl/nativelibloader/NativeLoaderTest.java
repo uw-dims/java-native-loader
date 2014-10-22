@@ -12,6 +12,8 @@ public class NativeLoaderTest extends junit.framework.TestCase {
 	public void testBogus() {
 		try {
 			NativeLoader.load( NativeLoader.class, "artifact", "1.0.0" );
+			fail();
+		} catch( UnsatisfiedLinkError ule ) {
 		} catch( Throwable t ) {
 			fail( "" + t );
 		}
