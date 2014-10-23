@@ -5,7 +5,7 @@
 
   <groupId>edu.uw.apl.commons</groupId>
   <artifactId>native-lib-loader</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <packaging>jar</packaging>
 
   <name>Java Native Library Loader - Load JNI Libs From The Classpath</name>

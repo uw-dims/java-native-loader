@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -62,11 +64,13 @@ public class NativeLoader {
 										  String artifact,
 										  String version )
 		throws IOException {
+
+		String key = group + "-" + artifact + "-" + version;
 		try {
-			if( isLoaded )
+			if( loaded.contains( key ) )
 				return;
 			loadNativeLibrary( group, artifact, version );
-			isLoaded = true;
+			loaded.add( key );
 		} catch( IOException ioe ) {
 			log.error( ioe );
 			throw ioe;
@@ -95,7 +99,7 @@ public class NativeLoader {
 			System.loadLibrary( artifact + "-" + version );
 			return;
 		}
-		nativeLibFile = findNativeLibrary( group, artifact, version, p );
+		File nativeLibFile = findNativeLibrary( group, artifact, version, p );
 		if( nativeLibFile != null ) {
 			System.load( nativeLibFile.getPath() );
 		}
@@ -221,11 +225,8 @@ public class NativeLoader {
         return NativeLoader.class.getResource(path) != null;
     }
 
-
-	static private volatile boolean isLoaded = false;
-    static private File nativeLibFile = null;
-
-	static private Log log = LogFactory.getLog( NativeLoader.class );
+	static private final Set<String> loaded = new HashSet<String>();
+	static private final Log log = LogFactory.getLog( NativeLoader.class );
 }
 
 // eof
