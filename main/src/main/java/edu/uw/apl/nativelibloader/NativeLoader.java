@@ -37,11 +37,10 @@ public class NativeLoader {
 	 * group name is derived from a class's own package name
 	 */
 	static public synchronized void load( Class c,
-										  String artifact,
-										  String version )
-	throws IOException {
-		String group = c.getPackage().getName();
-		load( group, artifact, version );
+										  String artifact ) 
+		throws IOException {
+		String package_ = c.getPackage().getName();
+		load( package_, artifact );
 	}
 	
 	/*
@@ -49,27 +48,25 @@ public class NativeLoader {
 	 * (presumably some JNI code associated with local Java classes)
 	 * which has been packaged into an available jar as e.g.
 	 *
-	 * com/foo/bar/Linux/x86/libstuff-1.2.3.so
+	 * com/foo/bar/Linux/x86/libstuff.so
 	 *
-	 * for some supplied 'group' = com.foo.bar
+	 * for some supplied 'package' = com.foo.bar
 	 * and some supplied 'artifact' = stuff
-	 * and some supplied 'version' =  1.2.3
 	 *
-	 * These 3 strings would likely be available to the caller as
+	 * The artifact would likely be available to the caller as
 	 * info from a Maven-driven build.
 	 *
 	 * @see asResourceName
 	 */
 	static public synchronized void load( String group,
-										  String artifact,
-										  String version )
+										  String artifact )
 		throws IOException {
 
-		String key = group + "-" + artifact + "-" + version;
+		String key = group + "-" + artifact;
 		try {
 			if( loaded.contains( key ) )
 				return;
-			loadNativeLibrary( group, artifact, version );
+			loadNativeLibrary( group, artifact );
 			loaded.add( key );
 		} catch( IOException ioe ) {
 			log.error( ioe );
@@ -79,27 +76,26 @@ public class NativeLoader {
 
 		
 	static private synchronized void loadNativeLibrary( String group,
-														String artifact,
-														String version )
+														String artifact )
 		throws IOException {
 
-		log.debug( "Loading: " + group + " " + artifact + " " + version );
+		log.debug( "Loading: " + group + " " + artifact );
 		
 		String keyPrefix = group + "." + artifact;
 		String prpResourceName = keyPrefix + ".properties";
 		Properties p = loadConfiguration( prpResourceName );
 		boolean useExternal = Boolean.parseBoolean
-			( p.getProperty( keyPrefix + "." + "useExternal", "false" ) );
+			( p.getProperty( keyPrefix + "." + "useLibraryPath", "false" ) );
 		if( useExternal ) {
 			/*
 			  Load external artifact (i.e. one found, hopefully, using
 			  -Djava.library.path).  Do NOT proceed to load from a local
 			  resource
 			*/
-			System.loadLibrary( artifact + "-" + version );
+			System.loadLibrary( artifact );
 			return;
 		}
-		File nativeLibFile = findNativeLibrary( group, artifact, version, p );
+		File nativeLibFile = findNativeLibrary( group, artifact, p );
 		if( nativeLibFile != null ) {
 			System.load( nativeLibFile.getPath() );
 		}
@@ -111,20 +107,18 @@ public class NativeLoader {
 	*/
 	static private File findNativeLibrary( String group,
 										   String artifact,
-										   String version,
 										   Properties p )
 		throws IOException {
 
 		/*
 		  We compose the final resourceName in a way similar to the
-		  Maven convention for artifact file naming:
-		  GROUP/ARTIFACT-VERSION.  This is also similar to how .so
-		  files are named, except there the version trails the .so
-		  suffix (see e.g. /lib/ on any Unix system).
+		  Maven convention for artifact file naming: GROUP/ARTIFACT.
+		  This is also similar to how .so files are named, except
+		  there the version trails the .so suffix (see e.g. /lib/ on
+		  any Unix system).
 		*/
 
-		String nativeLibraryName = System.mapLibraryName( artifact +
-														  "-" + version );
+		String nativeLibraryName = System.mapLibraryName( artifact );
 		String nativeLibraryPath = group.replaceAll( "\\.", "/" ) +
 			"/native/" + OSInfo.getNativeLibFolderPathForCurrentOS();
 
@@ -134,8 +128,7 @@ public class NativeLoader {
 		  Class.getResourceAsStream() calls (dots in the version
 		  string could get replaced with slash!)
 		*/
-		String resourceName = "/" +	nativeLibraryPath +
-			"/" + nativeLibraryName;
+		String resourceName = "/" +	nativeLibraryPath +	"/" + nativeLibraryName;
 		log.debug( "ResourceName: " + resourceName );
 
 		boolean haveNativeLib = haveResource( resourceName );
@@ -143,7 +136,7 @@ public class NativeLoader {
             if( OSInfo.getOSName().equals("Mac") ) {
                 // Fix for openjdk7 for Mac
                 String altLibraryName =
-					"lib" + (artifact + "-" + version) + ".jnilib";
+					"lib" + artifact + ".jnilib";
 				resourceName = "/" + nativeLibraryPath +
 					"/" + altLibraryName;
 				log.debug( "AltResourceName: " + resourceName );
@@ -152,7 +145,6 @@ public class NativeLoader {
                 }
             }
         }
-
 
 		if( !haveNativeLib ) 
 			throw new IllegalStateException( "Native library missing: " +
