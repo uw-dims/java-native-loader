@@ -1,6 +1,7 @@
 *.class
 target
-paste
-*~
+
+*.o
+*.so
 
 # eof

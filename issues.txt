@@ -1,0 +1,9 @@
+1: In the recipe pom.xml, how to direct the 'make' build to the
+CANONICAL arch name, e.g src/main/native/Linux/x86_64, when the
+os.arch value would return e.g. 'amd64'.  We need the same 'normalized
+map' in the mvn invocation as we have in the Nativelibloader at
+run-time.
+
+2: How to alter the exec:native command line, e.g. 'make' per
+platform?  Related to 1.  If running on Windows, would want command
+line to be e.g. 'nmake' not 'make'.

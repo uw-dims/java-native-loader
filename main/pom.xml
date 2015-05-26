@@ -9,7 +9,8 @@
   <packaging>jar</packaging>
 
   <name>Java Native Library Loader - Load JNI Libs From The Classpath</name>
-  <url>http://maven.apache.org</url>
+  <url>http://eis.apl.uw.edu</url>
+  <inceptionYear>2014</inceptionYear>
 
   <dependencies>
     <dependency>
@@ -28,7 +29,7 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
-    <!-- We use log4j in local testing.  It is NOT a runtime dependency -->
+    <!-- We use log4j in local unit testing.  It is NOT a runtime dependency -->
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>

@@ -10,11 +10,35 @@ import java.util.Locale;
  */
 
 
-// This code is derived from Taro Saito's snappy-java project:
-// https://github.com/xerial/snappy-java. See NOTICE.txt for details.
+/*
+  This code is derived from Taro Saito's snappy-java project:
+  https://github.com/xerial/snappy-java. See NOTICE.txt for details.
+*/
+
+/**
+ * Interrogate the OS on which our Java VM is running.  Mostly done
+ * via lookup of system properties <code>os.arch, os.name</code>. The
+ * native components of jars are expected to be packaged with resource
+ * names thus:
+ *
+ * com/foo/bar/native/Linux/x86_64/libfoo.so
+ *
+ * The job of this class, OSInfo, is to provide the 'Linux/x86_64'
+ * part of that path.
+ */
 
 public class OSInfo {
 
+	/**
+	 * Main entry point into this class.  As called by the main class
+	 * in this package: NativeLibLoader.
+	 *
+	 * @return a sub-path name, e.g. 'Linux/x86_64', to be used in
+	 * composing a full path name to a resource containing some
+	 * platform-specific (JNI) code.
+	 *
+	 * @see NativeLibLoader
+	 */
     static public String getNativeLibFolderPathForCurrentOS() {
         return getOSName() + "/" + getArchName();
     }
@@ -54,15 +78,39 @@ public class OSInfo {
         return translateArchNameToFolderName(osArch);
     }
 
-    private static Map<String, String> archMapping =
-		new HashMap<String, String>();
+    static String translateOSNameToFolderName(String osName) {
+        if (osName.contains("Windows")) {
+            return "Windows";
+        }
+        if (osName.contains("Mac")) {
+            return "Mac";
+        }
+        if (osName.contains("Linux")) {
+            return "Linux";
+        }
+		if (osName.contains("AIX")) {
+			return "AIX";
+		}
+		return osName.replaceAll("\\W", "");
+    }
 
+    static String translateArchNameToFolderName(String archName) {
+        return archName.replaceAll("\\W", "");
+    }
+
+	/*
+	  Canonical names for each hardware platform.  We map all values
+	  of os.arch to these names
+	*/
     public static final String X86 = "x86";
     public static final String X86_64 = "x86_64";
     public static final String IA64_32 = "ia64_32";
     public static final String IA64 = "ia64";
     public static final String PPC = "ppc";
     public static final String PPC64 = "ppc64";
+
+    private static Map<String, String> archMapping =
+		new HashMap<String, String>();
 
     static {
         // x86 mappings
@@ -102,41 +150,24 @@ public class OSInfo {
 		archMapping.put("power_rs64", PPC64);
     }
 
-    public static void main(String[] args) {
-        if (args.length >= 1) {
-            if ("--os".equals(args[0])) {
-                System.out.print(getOSName());
-                return;
-            }
-            else if ("--arch".equals(args[0])) {
-                System.out.print(getArchName());
-                return;
-            }
-        }
 
-        System.out.print(getNativeLibFolderPathForCurrentOS());
-    }
-
-
-    static String translateOSNameToFolderName(String osName) {
-        if (osName.contains("Windows")) {
-            return "Windows";
-        }
-        if (osName.contains("Mac")) {
-            return "Mac";
-        }
-        if (osName.contains("Linux")) {
-            return "Linux";
-        }
-		if (osName.contains("AIX")) {
-			return "AIX";
+	// Inlined main driver, as an inner class. Better as a unit test??
+    static public class Main {
+		public static void main(String[] args) {
+			if (args.length >= 1) {
+				if ("--os".equals(args[0])) {
+					System.out.print(getOSName());
+					return;
+				}
+				else if ("--arch".equals(args[0])) {
+					System.out.print(getArchName());
+					return;
+				}
+			}
+			
+			System.out.print(getNativeLibFolderPathForCurrentOS());
 		}
-		return osName.replaceAll("\\W", "");
-    }
-
-    static String translateArchNameToFolderName(String archName) {
-        return archName.replaceAll("\\W", "");
-    }
+	}
 }
 
 // eof

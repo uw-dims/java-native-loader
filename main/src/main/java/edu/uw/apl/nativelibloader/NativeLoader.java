@@ -16,15 +16,17 @@ import org.apache.commons.logging.LogFactory;
  * @author Stuart Maclean
  */
 
-// This code is derived from Taro Saito's snappy-java project:
-// https://github.com/xerial/snappy-java. See NOTICE.txt for details.
+/*
+  This code is derived from Taro Saito's snappy-java project:
+  https://github.com/xerial/snappy-java. See NOTICE.txt for details.
+*/
 
 
 /**
- * <b>Internal only - Do not use this class.</b> This class loads a native
- * library of supplied name (NAME.dll, libNAME.so, etc.) according to the
- * user platform (<i>os.name</i> and <i>os.arch</i>). The artifact is
- * expected to be found on the classpath (e.g. bundled into a jar).
+ * This class loads a native library of supplied name (NAME.dll,
+ * libNAME.so, etc.) according to the user platform (<i>os.name</i>
+ * and <i>os.arch</i>). The artifact is expected to be found on the
+ * classpath (e.g. bundled into a jar).
  *
  * TO DO: Document why use group,artifact,version
  *
@@ -53,8 +55,10 @@ public class NativeLoader {
 	 * for some supplied 'package' = com.foo.bar
 	 * and some supplied 'artifact' = stuff
 	 *
-	 * The artifact would likely be available to the caller as
-	 * info from a Maven-driven build.
+	 * The 'artifact' name would likely be available to the caller as
+	 * the artifact value from a Maven-driven build.  Ditto the
+	 * 'package', it could be the group vale from a Maven-driven
+	 * build.
 	 *
 	 * @see asResourceName
 	 */
@@ -73,7 +77,6 @@ public class NativeLoader {
 			throw ioe;
 		}
 	}
-
 		
 	static private synchronized void loadNativeLibrary( String group,
 														String artifact )
