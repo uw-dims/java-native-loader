@@ -18,13 +18,23 @@ import java.util.Locale;
 /**
  * Interrogate the OS on which our Java VM is running.  Mostly done
  * via lookup of system properties <code>os.arch, os.name</code>. The
- * native components of jars are expected to be packaged with resource
- * names thus:
+ * native components found via resource loading from the classpath
+ * (i.e. we bundle native libs into our jar) are expected to be
+ * packaged with resource names thus:
  *
  * com/foo/bar/native/Linux/x86_64/libfoo.so
  *
  * The job of this class, OSInfo, is to provide the 'Linux/x86_64'
- * part of that path.
+ * part of that path.  The remainder of the resource name is e.g.
+ *
+ * com/foo/bar - the resource path syntax of some 'prefix' com.foo.bar.
+ * native
+ * libfoo.so - for some 'libName' foo.
+ *
+ * The prefix and libName might be a Java package and class name, or a
+ * Maven groupID and artifactId.  The idea is to make the native
+ * library file have the 'feel' of a regular Java class.
+ *
  */
 
 public class OSInfo {
@@ -113,7 +123,7 @@ public class OSInfo {
 		new HashMap<String, String>();
 
     static {
-        // x86 mappings
+        // x86 mappings.  The 'canonical' name is X86
         archMapping.put(X86, X86);
         archMapping.put("i386", X86);
         archMapping.put("i486", X86);
