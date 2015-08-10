@@ -8,15 +8,15 @@ OS = Linux
 
 PWD = $(shell pwd)
 
-ifndef JAVA_HOME
-$(error JAVA_HOME make variable missing.  Copy $(PWD)/Makefile.env.sample to $(PWD)/Makefile.env and edit)
+ifndef JDK_HOME
+$(error JDK_HOME make variable missing.  Copy $(PWD)/Makefile.env.sample to $(PWD)/Makefile.env and edit)
 endif
 
-# The package and artifact name expected passed down by the Maven
+# The package and class name expected passed down by the Maven
 # invocation of this build. We supply some bogus ones if not aleady
 # set.  This will obviously lead to failure at runtime!
-PACKAGE  ?= P
-ARTIFACT ?= A
+PREFIX  ?= P
+LIBNAME ?= L
 
 BASEDIR = $(abspath $(NATIVEHOME)/../../..)
 
@@ -24,7 +24,7 @@ CFLAGS += -Wall -Werror -fPIC -std=c99
 
 CPPFLAGS += -I$(BASEDIR)/target/native/javah
 
-CPPFLAGS += -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+CPPFLAGS += -I$(JDK_HOME)/include -I$(JDK_HOME)/include/linux
 
 LDFLAGS += -shared
 
@@ -37,7 +37,7 @@ VPATH = $(NATIVEHOME)
 LINK.so = $(CC) $(LDFLAGS) $(LDLIBS)
 
 # the name of the library to build
-LIB		= lib$(ARTIFACT).so
+LIB		= lib$(LIBNAME).so
 
 
 PACKAGEASPATH = $(subst .,/,$(PACKAGE))
@@ -67,7 +67,10 @@ Makefile.env : Makefile.env.sample
 ############################## Test/debug targets #######################
 
 show-env:
-	@echo JAVA_HOME $(JAVA_HOME)
+	@echo ARCH $(ARCH)
+	@echo JDK_HOME $(JDK_HOME)
+	@echo PACKAGE $(PACKAGE)
+	@echo ARTIFACT $(ARTIFACT)
 
 show-srcs:
 	echo $(MAINSRCS)

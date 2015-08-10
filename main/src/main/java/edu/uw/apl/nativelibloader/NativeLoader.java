@@ -39,10 +39,10 @@ public class NativeLoader {
 	 * group name is derived from a class's own package name
 	 */
 	static public synchronized void load( Class c,
-										  String artifact ) 
+										  String libName ) 
 		throws IOException {
 		String package_ = c.getPackage().getName();
-		load( package_, artifact );
+		load( package_, libName );
 	}
 	
 	/*
@@ -52,25 +52,25 @@ public class NativeLoader {
 	 *
 	 * com/foo/bar/Linux/x86/libstuff.so
 	 *
-	 * for some supplied 'package' = com.foo.bar
-	 * and some supplied 'artifact' = stuff
+	 * for some supplied 'prefix' = com.foo.bar
+	 * and some supplied 'libName' = stuff
 	 *
-	 * The 'artifact' name would likely be available to the caller as
-	 * the artifact value from a Maven-driven build.  Ditto the
-	 * 'package', it could be the group vale from a Maven-driven
-	 * build.
+	 * The 'libName' name would likely be available to the caller as
+	 * the perhaps a class name, or as the artifact value from a
+	 * Maven-driven build.  Ditto the 'prefix', it could be a class's
+	 * package or the group value from a Maven-driven build.
 	 *
 	 * @see asResourceName
 	 */
-	static public synchronized void load( String group,
-										  String artifact )
+	static public synchronized void load( String prefix,
+										  String libName )
 		throws IOException {
 
-		String key = group + "-" + artifact;
+		String key = prefix + "-" + libName;
 		try {
 			if( loaded.contains( key ) )
 				return;
-			loadNativeLibrary( group, artifact );
+			loadNativeLibrary( prefix, libName );
 			loaded.add( key );
 		} catch( IOException ioe ) {
 			log.error( ioe );
@@ -78,38 +78,101 @@ public class NativeLoader {
 		}
 	}
 		
-	static private synchronized void loadNativeLibrary( String group,
-														String artifact )
+	static private synchronized void loadNativeLibrary( String prefix,
+														String libName )
 		throws IOException {
 
-		log.debug( "Loading: " + group + " " + artifact );
+		log.debug( "Loading: " + prefix + " " + libName );
+
+		Properties p = loadConfiguration( prefix, libName );
 		
-		String keyPrefix = group + "." + artifact;
-		String prpResourceName = keyPrefix + ".properties";
-		Properties p = loadConfiguration( prpResourceName );
-		boolean useExternal = Boolean.parseBoolean
-			( p.getProperty( keyPrefix + "." + "useLibraryPath", "false" ) );
-		if( useExternal ) {
+		if( isDefined( "disabled", prefix, libName, p ) ) {
+			log.debug( "Loading disabled: " + prefix + "," + libName );
+			return;
+		}
+		
+		if( isDefined( "useExternal", prefix, libName, p ) ) {
 			/*
 			  Load external artifact (i.e. one found, hopefully, using
 			  -Djava.library.path).  Do NOT proceed to load from a local
 			  resource
 			*/
-			System.loadLibrary( artifact );
+			System.loadLibrary( libName );
 			return;
 		}
-		File nativeLibFile = findNativeLibrary( group, artifact, p );
+			File nativeLibFile = findNativeLibrary( prefix, libName, p );
 		if( nativeLibFile != null ) {
 			System.load( nativeLibFile.getPath() );
 		}
 	}
 
+	static private Properties loadConfiguration( String prefix,
+												 String libName ) {
+		log.debug( "LoadConfiguration for " + prefix + "," + libName );
+		
+		Properties p = new Properties();
+		try {
+			String asResource = prefix.replaceAll( "\\.", "/" ) +
+				"/" + libName + ".properties";
+			InputStream is = NativeLoader.class.getResourceAsStream
+				( asResource );
+			if( is == null )
+				return p;
+			p.load( is );
+			is.close();
+		} catch( IOException e ) {
+		}
+		return p;
+	}
+
+	static private boolean isDefined( String key,
+									  String prefix, String libName,
+									  Properties p ) {
+		String s = getValue( key, prefix, libName, p );
+		return s != null;
+	}
+
+	/**
+	 * We attempt a look up of a value for the supplied key, with look
+	 * up first in System.property space, then in p space.  Further,
+	 * we use two look up keys, in a 'hierarchical namespace' fashion
+	 * (think log4j logger configuration, where a logger can be
+	 * defined at e.g. class level, or package level)
+	 */
+	static private String getValue( String key,
+									String prefix, String libName,
+									Properties p ) {
+		log.debug( "getValue: " + key + "," + prefix + "," + libName );
+
+		String keyP = prefix + "." + key;
+		log.debug( "keyP: " + keyP );
+		
+		String s = System.getProperty( keyP );
+		if( s != null )
+			return s;
+		s = p.getProperty( keyP );
+		if( s != null )
+			return s;
+		
+		String keyPL = prefix + "." + libName + "." + key;
+		log.debug( "keyPL: " + keyPL );
+
+		s = System.getProperty( keyPL );
+		if( s != null )
+			return s;
+		s = p.getProperty( keyPL );
+		if( s != null )
+			return s;
+
+		return null;
+	}
+	
 	/*
 	  Load an OS-dependent native library from the classpath
 	  (typically from inside a jar file)
 	*/
-	static private File findNativeLibrary( String group,
-										   String artifact,
+	static private File findNativeLibrary( String prefix,
+										   String libName,
 										   Properties p )
 		throws IOException {
 
@@ -121,8 +184,8 @@ public class NativeLoader {
 		  any Unix system).
 		*/
 
-		String nativeLibraryName = System.mapLibraryName( artifact );
-		String nativeLibraryPath = group.replaceAll( "\\.", "/" ) +
+		String nativeLibraryName = System.mapLibraryName( libName );
+		String nativeLibraryPath = prefix.replaceAll( "\\.", "/" ) +
 			"/native/" + OSInfo.getNativeLibFolderPathForCurrentOS();
 
 		/*
@@ -139,7 +202,7 @@ public class NativeLoader {
             if( OSInfo.getOSName().equals("Mac") ) {
                 // Fix for openjdk7 for Mac
                 String altLibraryName =
-					"lib" + artifact + ".jnilib";
+					"lib" + libName + ".jnilib";
 				resourceName = "/" + nativeLibraryPath +
 					"/" + altLibraryName;
 				log.debug( "AltResourceName: " + resourceName );
@@ -154,13 +217,12 @@ public class NativeLoader {
 											 resourceName );
         /*
 		  Temporary folder for the native library file.
-		  Use a user value of $group.$artifact.tempdir, or java.io.tmpdir
+		  Use a user value of $prefix.$libName.tmpdir, or java.io.tmpdir
 		  by default
 		*/
-		String keyPrefix = group + "." + artifact;
-		String prpKey = keyPrefix + ".tmpdir";
-		String tmpPath = p.getProperty( prpKey,
-										System.getProperty( "java.io.tmpdir"));
+		String tmpPath = getValue( "path", prefix, libName, p );
+		if( tmpPath == null )
+			tmpPath = System.getProperty( "java.io.tmpdir");
 		File tmpDir = new File( tmpPath ).getCanonicalFile();
 		log.debug( "Tempdir for native lib: " + tmpDir );
 		return extractLibraryFile( resourceName, tmpDir );
@@ -197,31 +259,21 @@ public class NativeLoader {
 		return extractedLibFile;
 	}
 	
-	static private Properties loadConfiguration( String prpName ) {
-		log.debug( "LoadConfiguration from " + prpName );
-		
-		// Inspired by log4j.debug, inspect the loading process...
-		boolean debugging =
-			Boolean.parseBoolean( System.getProperty( "nativelibloader.debug",
-													  "false" ) );
-		if( debugging ) {
-			// todo: add System.err as an appender for our logger ??
-		}
-
-		/*
-		  As per usual configuration 'hierarchies', stuff on the cmd line wins
-		*/
-		Properties p = new Properties();
-		// TO DO: look for and load a prp file held as a resource
-		return p;
-	}
 	
 	static private boolean haveResource( String path ) {
         return NativeLoader.class.getResource(path) != null;
     }
 
 	static private final Set<String> loaded = new HashSet<String>();
+
 	static private final Log log = LogFactory.getLog( NativeLoader.class );
+
+	static private boolean debugging;
+	static {
+		debugging = Boolean.parseBoolean
+			( System.getProperty( "nativelibloader.debug","false" ) );
+		
+	}
 }
 
 // eof
