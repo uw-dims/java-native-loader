@@ -1,3 +1,36 @@
+/**
+ * Copyright © 2015, University of Washington
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the University of Washington nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL UNIVERSITY OF WASHINGTON BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * --------------------------------------------------------------------------------
+ *
+ * The source code in this codebase is inspired, and in some cases
+ * directly re-implemented from, the Snappy Java project at
+ * https://github.com/xerial/snappy-java.  The LICENSE for that work is
+ * included [here] (./LICENSE.snappy-java)
+ */
 package edu.uw.apl.nativelibloader;
 
 import java.io.File;
@@ -50,7 +83,7 @@ public class NativeLoader {
 	 * (presumably some JNI code associated with local Java classes)
 	 * which has been packaged into an available jar as e.g.
 	 *
-	 * com/foo/bar/Linux/x86/libstuff.so
+	 * com/foo/bar/native/Linux/x86/libstuff.so
 	 *
 	 * for some supplied 'prefix' = com.foo.bar
 	 * and some supplied 'libName' = stuff
@@ -58,9 +91,8 @@ public class NativeLoader {
 	 * The 'libName' name would likely be available to the caller as
 	 * the perhaps a class name, or as the artifact value from a
 	 * Maven-driven build.  Ditto the 'prefix', it could be a class's
-	 * package or the group value from a Maven-driven build.
+	 * package or the groupId value from a Maven-driven build.
 	 *
-	 * @see asResourceName
 	 */
 	static public synchronized void load( String prefix,
 										  String libName )
@@ -100,12 +132,18 @@ public class NativeLoader {
 			System.loadLibrary( libName );
 			return;
 		}
-			File nativeLibFile = findNativeLibrary( prefix, libName, p );
+
+		File nativeLibFile = findNativeLibrary( prefix, libName, p );
 		if( nativeLibFile != null ) {
 			System.load( nativeLibFile.getPath() );
 		}
 	}
 
+	/**
+	 * Allow the loading process to be influenced by properties
+	 * loaded from the classpath, as identified by a resource name
+	 * built from prefix and libName
+	 */
 	static private Properties loadConfiguration( String prefix,
 												 String libName ) {
 		log.debug( "LoadConfiguration for " + prefix + "," + libName );
@@ -138,6 +176,8 @@ public class NativeLoader {
 	 * we use two look up keys, in a 'hierarchical namespace' fashion
 	 * (think log4j logger configuration, where a logger can be
 	 * defined at e.g. class level, or package level)
+	 *
+	 * @param p a Properties object as returned from loadConfiguration
 	 */
 	static private String getValue( String key,
 									String prefix, String libName,
@@ -267,13 +307,6 @@ public class NativeLoader {
 	static private final Set<String> loaded = new HashSet<String>();
 
 	static private final Log log = LogFactory.getLog( NativeLoader.class );
-
-	static private boolean debugging;
-	static {
-		debugging = Boolean.parseBoolean
-			( System.getProperty( "nativelibloader.debug","false" ) );
-		
-	}
 }
 
 // eof

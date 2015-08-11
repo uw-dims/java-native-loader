@@ -120,6 +120,10 @@
 		    <executable>make</executable>
 		    <commandlineArgs>clean</commandlineArgs>
 		    <environmentVariables>
+		      <ARCH>${arch}</ARCH>
+		      <JDK_HOME>${java.home}/..</JDK_HOME>
+		      <PREFIX>greetings</PREFIX>
+		      <LIBNAME>Hello</LIBNAME>
 		    </environmentVariables>
 		  </configuration>
 		</execution>
