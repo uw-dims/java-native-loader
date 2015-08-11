@@ -64,5 +64,5 @@ almost as easy to manage as regular Java classes.
 # Video/Slides
 
 The ideas behind this work were presented at the Seattle Java User
-Group meeting of 19 may 2015.  Slides and video available on the
-(Seajug web site) [www/seajug.org].
+Group meeting of 19 May 2015.  Slides and video available on the
+[Seajug web site] (www.seajug.org).
