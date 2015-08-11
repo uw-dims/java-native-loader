@@ -1,22 +1,25 @@
+# Stuart Maclean.  Building the sample hello-world C sources on Linux.
+# Assumes use of GNU Make, and uses tricks/features from that tool.
+
 SHELL = /bin/bash
 
 ifndef ARCH
-    $(error ARCH var missing.  Define in subdir Makefile and include this file)
+    $(error ARCH var missing.  Define in subdir Makefile, or pass here from basedir pom.xml)
 endif
 
 OS = Linux
 
 PWD = $(shell pwd)
 
-ifndef JAVA_HOME
-$(error JAVA_HOME make variable missing.  Copy $(PWD)/Makefile.env.sample to $(PWD)/Makefile.env and edit)
+ifndef JDK_HOME
+$(error JDK_HOME make variable missing.  Define in $(PWD)/Makefile.env, or pass here from basedir pom.xml)
 endif
 
-# The package and artifact name expected passed down by the Maven
-# invocation of this build. We supply some bogus ones if not aleady
-# set.  This will obviously lead to failure at runtime!
-PACKAGE  ?= P
-ARTIFACT ?= A
+# The prefix and libName expected passed down by the Maven invocation
+# of this build. We supply some bogus ones if not aleady set.  This
+# will obviously lead to load failure at runtime!
+PREFIX  ?= P
+LIBNAME ?= L
 
 BASEDIR = $(abspath $(NATIVEHOME)/../../..)
 
@@ -24,7 +27,7 @@ CFLAGS += -Wall -Werror -fPIC -std=c99
 
 CPPFLAGS += -I$(BASEDIR)/target/native/javah
 
-CPPFLAGS += -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+CPPFLAGS += -I$(JDK_HOME)/include -I$(JDK_HOME)/include/linux
 
 LDFLAGS += -shared
 
@@ -36,13 +39,14 @@ VPATH = $(NATIVEHOME)
 
 LINK.so = $(CC) $(LDFLAGS) $(LDLIBS)
 
-# the name of the library to build
-LIB		= lib$(ARTIFACT).so
+# The name of the library to build
+LIB		= lib$(LIBNAME).so
 
 
-PACKAGEASPATH = $(subst .,/,$(PACKAGE))
+PREFIXASPATH = $(subst .,/,$(PREFIX))
 
-TARGET_DIR = $(BASEDIR)/src/main/resources/$(PACKAGEASPATH)/native/$(OS)/$(ARCH)
+# This path matches what the NativeLoader class tries to locate...
+TARGET_DIR = $(BASEDIR)/src/main/resources/$(PREFIXASPATH)/native/$(OS)/$(ARCH)
 
 default: install
 
@@ -59,15 +63,13 @@ $(LIB): $(MAINOBJS)
 clean:
 	-rm $(LIB) *.o
 
-init: Makefile.env
-
-Makefile.env : Makefile.env.sample
-	cp Makefile.env.sample Makefile.env
-
 ############################## Test/debug targets #######################
 
 show-env:
-	@echo JAVA_HOME $(JAVA_HOME)
+	@echo ARCH $(ARCH)
+	@echo JDK_HOME $(JDK_HOME)
+	@echo PACKAGE $(PACKAGE)
+	@echo ARTIFACT $(ARTIFACT)
 
 show-srcs:
 	echo $(MAINSRCS)

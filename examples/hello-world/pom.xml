@@ -13,7 +13,13 @@
     <dependency>
       <groupId>edu.uw.apl.commons</groupId>
       <artifactId>native-lib-loader</artifactId>
-      <version>2.0.0</version>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.17</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -22,8 +28,33 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
+
   <profiles>
+    <profile>
+      <!-- Canonicalise all 32-bit arch names to 'x86' -->
+      <id>x86</id>
+      <activation>
+	<os>
+	  <arch>x86</arch>
+	</os>
+      </activation>
+      <properties>
+	<arch>x86</arch>
+      </properties>
+    </profile>
+    <profile>
+      <!-- Canonicalise all 64-bit arch names to 'x86_64' -->
+      <id>x86_64</id>
+      <activation>
+	<os>
+	  <arch>amd64</arch>
+	</os>
+      </activation>
+      <properties>
+	<arch>x86_64</arch>
+      </properties>
+    </profile>
+
     <profile>
 	<id>native</id>
 	<build>
@@ -62,13 +93,16 @@
 		  </goals>
 		  <configuration>
 		    <workingDirectory>
-		      src/main/native/${os.name}/${os.arch}
+		      src/main/native/${os.name}/${arch}
 		    </workingDirectory>
 		    <executable>make</executable>
 		    <commandlineArgs>install</commandlineArgs>
 		    <environmentVariables>
-		      <PACKAGE>${project.groupId}</PACKAGE>
-		      <ARTIFACT>${project.artifactId}</ARTIFACT>
+		      <ARCH>${arch}</ARCH>
+		      <!-- LOOK: Is this valid, using .. ? -->
+		      <JDK_HOME>${java.home}/..</JDK_HOME>
+		      <PREFIX>greetings</PREFIX>
+		      <LIBNAME>Hello</LIBNAME>
 		    </environmentVariables>
 		  </configuration>
 		</execution>
@@ -81,13 +115,15 @@
 		  </goals>
 		  <configuration>
 		    <workingDirectory>
-		      src/main/native/${os.name}/${os.arch}
+		      src/main/native/${os.name}/${arch}
 		    </workingDirectory>
 		    <executable>make</executable>
 		    <commandlineArgs>clean</commandlineArgs>
 		    <environmentVariables>
-		      <PACKAGE>${project.groupId}</PACKAGE>
-		      <ARTIFACT>${project.artifactId}</ARTIFACT>
+		      <ARCH>${arch}</ARCH>
+		      <JDK_HOME>${java.home}/..</JDK_HOME>
+		      <PREFIX>greetings</PREFIX>
+		      <LIBNAME>Hello</LIBNAME>
 		    </environmentVariables>
 		  </configuration>
 		</execution>
@@ -98,4 +134,13 @@
       </profile>
     </profiles>
 
+    <build>
+      <plugins>
+	<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-compiler-plugin</artifactId>
+	  <version>3.3</version>
+	</plugin>
+      </plugins>
+    </build>
 </project>
