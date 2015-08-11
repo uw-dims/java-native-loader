@@ -24,6 +24,7 @@ A sample Java codebase with JNI parts is at examples/hello-world:
 $ cd java-native-loader/examples/hello-world
 
 $ mvn test
+```
 
 The examples/hello-world sample shows how to organize the management of JNI
 resources in this framework:
@@ -62,4 +63,6 @@ almost as easy to manage as regular Java classes.
 
 # Video/Slides
 
-The ideas behind this work were presented at the Seattle Java User Group meeting of 19 may 2015.  Slides and video available on the (Seajug web site) [www/seajug.org].
+The ideas behind this work were presented at the Seattle Java User
+Group meeting of 19 may 2015.  Slides and video available on the
+(Seajug web site) [www/seajug.org].
