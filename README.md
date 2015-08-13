@@ -65,4 +65,5 @@ almost as easy to manage as regular Java classes.
 
 The ideas behind this work were presented at the Seattle Java User
 Group meeting of 19 May 2015.  Slides and video available on the
-[Seajug web site] (http://www.seajug.org).
+[Seajug web site] (http://www.seajug.org).  A local copy of the slides
+is also included [here](./doc/seajug-maven-jni.pdf).
