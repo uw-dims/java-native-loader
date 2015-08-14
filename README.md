@@ -50,16 +50,18 @@ complicated C code may require platform and even bit-ness
 sub-components.
 
 We have compiled the JNI parts of the hello-world sample for Linux
-64-bit only.  Nevertheless, the Maven pom files, Makefiles and
-directory structure promote a many-platform build.  The idea is to
-create platform and bitness (32/64) specific build scripts
-(e.g. Makefiles for Linux/Mac OS, .proj/NMAKE files for Windows), and
-build C sources from those.  The resulting .so/.dll files are then put
-under version control, so need building only once per platform.  We
-treat the .so/.dll products essentially as source code components,
-with a Maven profile-driven build of those platform-specific parts.
-The net effect is that the C parts of a split Java/C build become
-almost as easy to manage as regular Java classes.
+64-bit and 32-bit only (the .so files end up as
+[resources](./examples/hello-world/src/main/resources/greetings/native/Linux/).
+Nevertheless, the Maven pom files, Makefiles and directory structure
+promote a many-platform build (Windows, MacOS, etc).  The idea is to create
+platform and bitness (32/64) specific build scripts (e.g. Makefiles
+for Linux/Mac OS, .proj/NMAKE files for Windows), and build C sources
+from those.  The resulting .so/.dll files are then put under version
+control, so need building only once per platform.  We treat the
+.so/.dll products essentially as source code components, with a Maven
+profile-driven build of those platform-specific parts.  The net effect
+is that the C parts of a split Java/C build become almost as easy to
+manage as regular Java classes.
 
 # Video/Slides
 
