@@ -30,8 +30,8 @@
   </dependencies>
 
   <profiles>
+    <!-- Canonicalise all 32-bit arch names to 'x86' -->
     <profile>
-      <!-- Canonicalise all 32-bit arch names to 'x86' -->
       <id>x86</id>
       <activation>
 	<os>
@@ -43,8 +43,20 @@
       </properties>
     </profile>
     <profile>
+      <id>i386</id>
+      <activation>
+	<os>
+	  <arch>i386</arch>
+	</os>
+      </activation>
+      <properties>
+	<arch>x86</arch>
+      </properties>
+    </profile>
+
       <!-- Canonicalise all 64-bit arch names to 'x86_64' -->
-      <id>x86_64</id>
+    <profile>
+      <id>amd64</id>
       <activation>
 	<os>
 	  <arch>amd64</arch>
