@@ -10,7 +10,7 @@ illusion of platform independence, pure Java code and thus of a
 regular Maven build/test/install cycle and seamless dependency
 management of JNI-contaminated artifacts.
 
-## Installation Requirements
+## Installation 
 
 The primary artifact for native library loading is under the main directory:
 
@@ -27,6 +27,15 @@ $ cd java-native-loader/examples/hello-world
 
 $ mvn test
 ```
+
+## Framework Use
+
+* The [Device Files] (https://github.com/uw-dims/device-files)
+  project uses the framework described here.  It is a much better
+  example than the hello-world example above since requires different
+  C sources and build procedures for different platforms.
+
+## Framework Description
 
 The examples/hello-world sample shows how to organize the management of JNI
 resources in this framework:
