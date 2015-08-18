@@ -79,7 +79,7 @@ profile-driven build of those platform-specific parts.  The net effect
 is that the C parts of a split Java/C build become almost as easy to
 manage as regular Java classes.
 
-# Video/Slides
+## Video/Slides
 
 The ideas behind this work were presented at the Seattle Java User
 Group meeting of 19 May 2015.  Slides and video available on the
