@@ -30,10 +30,20 @@ $ mvn test
 
 ## Framework Use
 
-* The [Device Files] (https://github.com/uw-dims/device-files)
-  project uses the framework described here.  It is a much better
-  example than the hello-world example above since requires different
-  C sources and build procedures for different platforms.
+The following projects use the Java Native Loader framework described
+here in order to build and then load their own C code:
+
+* The [Device Files] (https://github.com/uw-dims/device-files) project
+  enables Java programs to extract low-level disk parameters such as
+  vendor and serial number, plus whole disk size.
+
+* The [TSK4J] (https://github.com/uw-dims/tsk4j) project provides an
+  object-oriented view on the [Sleuthkit]
+(http://www.sleuthkit.org/sleuthkit/) host-forensics library.
+
+These are far better examples than the hello-world example
+above. DeviceFiles needs different C sources and build procedures for
+different platforms. TSK4J involves linking to third party C libraries.
 
 ## Framework Description
 

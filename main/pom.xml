@@ -12,6 +12,28 @@
   <url>http://eis.apl.uw.edu</url>
   <inceptionYear>2014</inceptionYear>
 
+  <organization>
+    <name>Applied Physics Laboratory, University of Washington.</name>
+    <url>http://www.apl.uw.edu</url>
+  </organization>
+  
+  <developers>
+    <developer>
+      <id>stuart</id>
+      <name>Stuart Maclean</name>
+      <email>stuart@apl.uw.edu</email>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>BSD 3-Clause</name>
+      <url>http://opensource.org/licenses/BSD-3-Clause</url>
+      <comments>See ../LICENSE</comments>
+      <distribution>manual</distribution>
+    </license>
+  </licenses>
+
   <dependencies>
     <dependency>
       <groupId>commons-io</groupId>

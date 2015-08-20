@@ -28,4 +28,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The source code in this codebase is inspired, and in some cases
 directly re-implemented from, the Snappy Java project at
 https://github.com/xerial/snappy-java.  The LICENSE for that work is
-included [here] (./LICENSE.snappy-java)
+included [here] (./NOTICE.txt).
