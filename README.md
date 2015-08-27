@@ -41,9 +41,14 @@ here in order to build and then load their own C code:
   object-oriented view on the [Sleuthkit]
 (http://www.sleuthkit.org/sleuthkit/) host-forensics library.
 
+* The [FUSE4J] (https://github.com/uw-dims/fuse4j) project implements
+  Java bindings to [FUSE] (http://fuse.sourceforge.net).
+  
 These are far better examples than the hello-world example
 above. DeviceFiles needs different C sources and build procedures for
 different platforms. TSK4J involves linking to third party C libraries.
+FUSE4J needs both different build procedures (compiler flags differing
+in 32 vs 64 bit builds) and links to a third party C library.
 
 ## Framework Description
 
