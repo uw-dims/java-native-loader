@@ -4,4 +4,8 @@ target
 *.o
 #*.so
 
+.classpath
+.settings
+.project
+
 # eof
